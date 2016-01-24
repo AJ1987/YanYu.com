@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>CNSN</title>
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+        #container {
+            height: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+    
+    <div id="mapContainer"></div>
+
+
+    <div id="result">
+        <button id="open">打开</button>
+        <button id="close">关闭</button>
+    </div>
+
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=8xKbaMwOZEQEQgYfNEHGow3v">
+    </script>
+    <!-- 加载百度地图样式信息窗口 -->
+    <script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js"></script>
+    <link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css" />
+    <script type="text/javascript">
+        var map = new BMap.Map("mapContainer");          // 创建地图实例
+        var point = new BMap.Point(121.496724, 31.21351);  // 创建点坐标
+        map.centerAndZoom(point, 15);                 // 初始化地图，设置中心点坐标和地图级别
+        map.enableScrollWheelZoom();
+        map.addControl(new BMap.NavigationControl());
+
+        var customerLayer;
+        function addCustomerLayer(keyword) {
+            if (customerLayer) {
+                map.removeTileLayer(customerLayer);
+            }
+            customerLayer = new BMap.CustomLayer({
+                geotableId: 131493,//会所表id
+                q: '',
+                tags: '',
+                filter: ''
+            });
+            map.addTileLayer(customerLayer);
+            customerLayer.addEventListener('hotspotclick', callback);
+        }
+        function callback(e)//单击热点图层
+        {
+            var customPoi = e.customPoi;//poi的默认字段
+            var contentPoi = e.content;//poi的自定义字段
+            var content = '<p style="width:280px;margin:0;line-height:20px;">地址：' + customPoi.address + '<br/></p>';
+            var searchInfoWindow = new BMapLib.SearchInfoWindow(map, content, {
+                title: customPoi.title, //标题
+                width: 290, //宽度
+                height: 40, //高度
+                panel: "panel", //检索结果面板
+                enableAutoPan: true, //自动平移
+                enableSendToPhone: true, //是否显示发送到手机按钮
+                searchTypes: [
+					BMAPLIB_TAB_SEARCH,   //周边检索
+					BMAPLIB_TAB_TO_HERE,  //到这里去
+					BMAPLIB_TAB_FROM_HERE //从这里出发
+                ]
+            });
+            var point = new BMap.Point(customPoi.point.lng, customPoi.point.lat);
+            //searchInfoWindow.open(point);
+            var maker = new BMap.Marker(point);//创建maker对象
+            //maker.enableDragging();//可拖拽
+            searchInfoWindow.open(maker);
+        }
+
+        document.getElementById("open").onclick = function () {
+            addCustomerLayer();
+        };
+        document.getElementById("open").click();
+        document.getElementById("close").onclick = function () {
+            if (customerLayer) {
+                map.removeTileLayer(customerLayer);
+            }
+        };
+    </script>
+</body>
+</html>
